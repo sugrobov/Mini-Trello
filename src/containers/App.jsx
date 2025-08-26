@@ -117,7 +117,7 @@ function App() {
   };
 
   // Обработчик завершения перетаскивания
-  const handleDragEnd = (event) => {
+    const handleDragEnd = (event) => {
     const { active, over } = event;
     setActiveId(null);
 
@@ -144,37 +144,56 @@ function App() {
     const activeIsTask = state.tasks[active.id];
     const overIsTask = state.tasks[over.id];
 
-    if (activeIsTask && overIsTask) {
-      // Находим колонки, в которых находятся задачи
-      const activeColumn = state.columns.find(col => col.taskIds.includes(active.id));
-      const overColumn = state.columns.find(col => col.taskIds.includes(over.id));
+    if (activeIsTask) {
+      // Находим исходную колонку (откуда перемещаем)
+      const sourceColumn = state.columns.find(col => col.taskIds.includes(active.id));
+      
+      // Находим целевую колонку (куда перемещаем)
+      let targetColumn;
+      let overIndex;
+      
+      if (overIsTask) {
+        // Если задача перемещается над другой задачей
+        targetColumn = state.columns.find(col => col.taskIds.includes(over.id));
+        overIndex = targetColumn.taskIds.indexOf(over.id);
+      } else if (overIsColumn) {
+        // Если задача перемещается в пустую колонку
+        targetColumn = state.columns.find(col => col.id === over.id);
+        overIndex = 0; // Добавляем в начало колонки
+      } else {
+        return; // Неизвестный тип элемента
+      }
 
       // Если задачи в одной колонке
-      if (activeColumn.id === overColumn.id) {
+      if (sourceColumn.id === targetColumn.id) {
         updateState(draft => {
-          const column = draft.columns.find(col => col.id === activeColumn.id);
+          const column = draft.columns.find(col => col.id === sourceColumn.id);
           const activeIndex = column.taskIds.indexOf(active.id);
-          const overIndex = column.taskIds.indexOf(over.id);
+          overIndex = overIsTask ? targetColumn.taskIds.indexOf(over.id) : 0;
           column.taskIds = arrayMove(column.taskIds, activeIndex, overIndex);
         });
       } else {
         // Если задачи в разных колонках
         updateState(draft => {
-          const activeCol = draft.columns.find(col => col.id === activeColumn.id);
-          const overCol = draft.columns.find(col => col.id === overColumn.id);
-
-          const activeIndex = activeCol.taskIds.indexOf(active.id);
-          const overIndex = overCol.taskIds.indexOf(over.id);
-
-          // Удаляем задачу из активной колонки
-          activeCol.taskIds.splice(activeIndex, 1);
+          const sourceCol = draft.columns.find(col => col.id === sourceColumn.id);
+          const targetCol = draft.columns.find(col => col.id === targetColumn.id);
+          
+          const activeIndex = sourceCol.taskIds.indexOf(active.id);
+          
+          // Удаляем задачу из исходной колонки
+          sourceCol.taskIds.splice(activeIndex, 1);
+          
           // Добавляем задачу в целевую колонку
-          overCol.taskIds.splice(overIndex, 0, active.id);
+          if (overIsTask) {
+            const overIndex = targetCol.taskIds.indexOf(over.id);
+            targetCol.taskIds.splice(overIndex, 0, active.id);
+          } else {
+            targetCol.taskIds.push(active.id);
+          }
         });
       }
     }
   };
-
   // Добавление новой колонки
   const addColumn = () => {
     if (newColumnTitle.trim() === '') return;
