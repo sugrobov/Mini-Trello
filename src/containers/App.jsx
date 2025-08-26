@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -16,20 +16,27 @@ import {
 } from '@dnd-kit/sortable';
 
 import { useImmer } from 'use-immer';
+import { v4 as uuidv4 } from 'uuid';
+
+import localForage from 'localforage';
+
 import { initialState } from '../config';
 
 import SortableTask from '../components/SortableTask';
 import SortableColumn from '../components/SortableColumn';
 import TaskInput from '../components/TaskInput';
 
-// ID
-const generateId = () => Math.random().toString(36).substr(2, 9);
+/**
+ * ключ для хранения состояния в localStorage
+ */
+import { STORAGE_KEY } from '../config';
 
 function App() {
   const [state, setState] = useImmer(initialState);
   const [history, setHistory] = useState({ past: [], future: [] });
   const [newColumnTitle, setNewColumnTitle] = useState('');
   const [activeId, setActiveId] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(true);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -37,6 +44,39 @@ function App() {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+    // Загрузка состояния из localForage при монтировании
+  useEffect(() => {
+    const loadState = async () => {
+      try {
+        const savedState = await localForage.getItem(STORAGE_KEY);
+        if (savedState) {
+          setState(savedState);
+        }
+        setIsLoaded(true);
+      } catch (error) {
+        console.error('Ошибка при загрузке состояния:', error);
+        setIsLoaded(true);
+      }
+    };
+
+    loadState();
+  }, [setState]);
+
+  // Сохранение состояния в localForage при изменении
+  useEffect(() => {
+    if (isLoaded) {
+      const saveState = async () => {
+        try {
+          await localForage.setItem(STORAGE_KEY, state);
+        } catch (error) {
+          console.error('Ошибка при сохранении состояния:', error);
+        }
+      };
+
+      saveState();
+    }
+  }, [state, isLoaded]);
 
   // Функция для обновления состояния с сохранением истории
   const updateState = (updater) => {
@@ -139,7 +179,7 @@ function App() {
   const addColumn = () => {
     if (newColumnTitle.trim() === '') return;
 
-    const newColumnId = generateId();
+    const newColumnId = uuidv4();
     updateState(draft => {
       draft.columns.push({
         id: `column-${newColumnId}`,
@@ -154,7 +194,7 @@ function App() {
   const addTask = (columnId, content) => {
     if (content.trim() === '') return;
 
-    const newTaskId = generateId();
+    const newTaskId = uuidv4();
     updateState(draft => {
       const taskId = `task-${newTaskId}`;
       draft.tasks[taskId] = { id: taskId, content };
@@ -211,6 +251,27 @@ function App() {
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
   };
+
+    // Очистка локального хранилища
+  const clearStorage = async () => {
+    try {
+      await localForage.removeItem(STORAGE_KEY);
+      setState(initialState);
+      setHistory({ past: [], future: [] });
+      alert('Локальное хранилище очищено!');
+    } catch (error) {
+      console.error('Ошибка при очистке хранилища:', error);
+    }
+  };
+
+    // загрузчик
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-xl">Загрузка...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">

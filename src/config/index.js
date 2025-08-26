@@ -1,3 +1,6 @@
+/**
+ *  @initialState
+ */
 export const initialState = {
   columns: [
     {
@@ -24,3 +27,6 @@ export const initialState = {
     'task-5': { id: 'task-5', content: 'Изучить №5' }
   }
 };
+
+// Ключ для сохранения в localForage
+export const STORAGE_KEY = 'trello-app-state';
