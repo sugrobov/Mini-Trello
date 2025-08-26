@@ -1,12 +1,55 @@
-# React + Vite
+Mini-Trello Application 
+[![Live Demo](https://img.shields.io/badge/demo-live-green?style=for-the-badge)](https://m-trello.netlify.app/)
+A React-based task management application with Trello-like functionality, featuring drag-and-drop capabilities, undo/redo actions, and persistent state storage.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+🚀 Features
+- Multi-column boards with create, delete, and reorder functionality
+- Drag & Drop for tasks and columns using @dnd-kit
+- Undo/Redo system for action history management
+- Persistent state across page reloads using localForage
+- JSON export for data backup and sharing
+- Responsive design with Tailwind CSS styling
 
-Currently, two official plugins are available:
+🛠 Technologies Used
+- React 18+ - UI framework
+- @dnd-kit - Drag and drop functionality
+- use-immer - Immutable state management
+- localForage - Client-side storage
+- Tailwind CSS - Styling and responsive design
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+📦 Installation and Setup
+Clone the repository:
 
-## Expanding the ESLint configuration
+bash
+git clone <your-repository-url>
+cd mini-trello
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Install dependencies:
+
+bash
+npm install
+
+Start the development server:
+
+bash
+npm run dev
+
+Open http://localhost:5173 in your browser.
+
+🎮 How to Use
+Column Management
+Add a column: Enter a title in the input field and click "Add Column"
+Delete a column: Click the "×" button in the column header
+Reorder columns: Drag a column by its header to a new position
+
+Task Management
+Add a task: Enter text in the input field below a column and click "Add"
+Delete a task: Click the "×" button on a task card
+Move tasks: Drag tasks between columns or within the same column
+
+Additional Features
+Undo/Redo: Use the "Undo" and "Redo" buttons to manage action history
+Export data: Click "Export JSON" to save your board state to a file
+
+Clear data: Click "Clear" to remove all data from local storage
+
