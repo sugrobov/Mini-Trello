@@ -224,7 +224,11 @@ function App() {
 
   // Удаление задачи
   const deleteTask = (taskId, columnId) => {
-    //  console.log('Deleting task:', taskId, 'from column:', columnId);
+    console.log('Deleting task:', taskId, 'from column:', columnId);
+    if (!state.tasks[taskId]) { // Проверяем, существует ли задача
+      console.log('Task not found:', taskId);
+      return;
+    }
 
     updateState(draft => {
       // Удаляем задачу из колонки
@@ -235,7 +239,7 @@ function App() {
 
       // Удаляем 
       delete draft.tasks[taskId];
-    
+
     });
   };
 
@@ -354,13 +358,15 @@ function App() {
                         const task = state.tasks[taskId];
                         if (!task) return null; // если нет задачи, то пропускаем её
                         return (
-                          <SortableTask
-                            key={task.id}
-                            id={task.id}
-                            task={task}
-                            columnId={column.id}
-                            onDelete={deleteTask}
-                          />
+                          <div key={task.id} className="sortable-task">
+                            <SortableTask
+                              key={task.id}
+                              id={task.id}
+                              task={task}
+                              columnId={column.id}
+                              onDelete={deleteTask}
+                            />
+                          </div>
                         );
                       })}
                     </div>

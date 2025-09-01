@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+/* Убедимся, что кнопки удаления всегда доступны для клика */
+.sortable-task button {
+  z-index: 20;
+  position: relative;
+}
+
+/* На больших экранах увеличиваем область клика для кнопок */
+@media (min-width: 1024px) {
+  .sortable-task button {
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 1.5rem;
+  }
+}
+
+/* Убедимся, что элементы не перекрываются при перетаскивании */
+.dragging {
+  z-index: 100;
+}
