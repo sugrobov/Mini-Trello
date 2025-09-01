@@ -45,7 +45,7 @@ function App() {
     })
   );
 
-    // Загрузка состояния из localForage при монтировании
+  // Загрузка состояния из localForage при монтировании
   useEffect(() => {
     const loadState = async () => {
       try {
@@ -117,7 +117,7 @@ function App() {
   };
 
   // Обработчик завершения перетаскивания
-    const handleDragEnd = (event) => {
+  const handleDragEnd = (event) => {
     const { active, over } = event;
     setActiveId(null);
 
@@ -147,11 +147,11 @@ function App() {
     if (activeIsTask) {
       // Находим исходную колонку (откуда перемещаем)
       const sourceColumn = state.columns.find(col => col.taskIds.includes(active.id));
-      
+
       // Находим целевую колонку (куда перемещаем)
       let targetColumn;
       let overIndex;
-      
+
       if (overIsTask) {
         // Если задача перемещается над другой задачей
         targetColumn = state.columns.find(col => col.taskIds.includes(over.id));
@@ -177,12 +177,12 @@ function App() {
         updateState(draft => {
           const sourceCol = draft.columns.find(col => col.id === sourceColumn.id);
           const targetCol = draft.columns.find(col => col.id === targetColumn.id);
-          
+
           const activeIndex = sourceCol.taskIds.indexOf(active.id);
-          
+
           // Удаляем задачу из исходной колонки
           sourceCol.taskIds.splice(activeIndex, 1);
-          
+
           // Добавляем задачу в целевую колонку
           if (overIsTask) {
             const overIndex = targetCol.taskIds.indexOf(over.id);
@@ -224,37 +224,36 @@ function App() {
 
   // Удаление задачи
   const deleteTask = (taskId, columnId) => {
+    //  console.log('Deleting task:', taskId, 'from column:', columnId);
+
     updateState(draft => {
       // Удаляем задачу из колонки
       const column = draft.columns.find(col => col.id === columnId);
       if (column) {
         column.taskIds = column.taskIds.filter(id => id !== taskId);
       }
-      
-      // Удаляем саму задачу
-      if (draft.tasks[taskId]) {
-        delete draft.tasks[taskId];
-      }
+
+      // Удаляем 
+      delete draft.tasks[taskId];
+    
     });
   };
 
   // Удаление колонки
   const deleteColumn = (columnId) => {
-    // Находим колонку для удаления
-    const columnToDelete = state.columns.find(col => col.id === columnId);
-    if (!columnToDelete) return;
-    
-    // Удаляем все задачи колонки
-    const newTasks = {...state.tasks};
-    columnToDelete.taskIds.forEach(taskId => {
-      delete newTasks[taskId];
-    });
-    
-    // Удаляем колонку
-    updateState({
-      ...state,
-      tasks: newTasks,
-      columns: state.columns.filter(col => col.id !== columnId)
+    updateState(draft => {
+      // Находим колонку для удаления
+      const columnIndex = draft.columns.findIndex(col => col.id === columnId);
+      if (columnIndex === -1) return;
+
+      // Удаляем все задачи колонки
+      const columnToDelete = draft.columns[columnIndex];
+      columnToDelete.taskIds.forEach(taskId => {
+        delete draft.tasks[taskId];
+      });
+
+      // Удаляем саму колонку
+      draft.columns.splice(columnIndex, 1);
     });
   };
 
@@ -271,7 +270,7 @@ function App() {
     linkElement.click();
   };
 
-    // Очистка локального хранилища
+  // Очистка локального хранилища
   const clearStorage = async () => {
     try {
       await localForage.removeItem(STORAGE_KEY);
@@ -283,7 +282,7 @@ function App() {
     }
   };
 
-    // загрузчик
+  // загрузчик
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
